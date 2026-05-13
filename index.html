@@ -1,133 +1,1209 @@
 <!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | Toka</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
-  </head>
-  <body>
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katse Dam — Lesotho Highlands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    --water-deep: #0a1628;
+    --water-mid: #0d2444;
+    --water-blue: #1a4a7a;
+    --water-light: #2d7dd2;
+    --water-glow: #5ba3e8;
+    --dam-stone: #8b7355;
+    --dam-light: #c4a882;
+    --gold-accent: #d4a844;
+    --gold-light: #f0c870;
+    --white: #f5f0e8;
+    --off-white: #e8e0d0;
+    --text-muted: #9ba8b8;
+    --danger: #e05050;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--water-deep);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ─── HERO ─── */
+  #hero {
+    position: relative;
+    height: 100vh;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 80%, rgba(45,125,210,0.25) 0%, transparent 65%),
+      radial-gradient(ellipse 120% 80% at 50% 110%, rgba(13,36,68,0.9) 0%, transparent 60%),
+      linear-gradient(180deg, #060e1c 0%, #0a1628 40%, #0d2444 100%);
+  }
+
+  /* Water wave animation */
+  .wave-container {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 220px;
+    overflow: hidden;
+  }
+
+  .wave {
+    position: absolute;
+    bottom: 0; left: -50%;
+    width: 200%;
+    height: 100%;
+  }
+
+  .wave svg { width: 100%; height: 100%; }
+
+  .wave-1 { animation: waveMove 8s linear infinite; opacity: 0.6; }
+  .wave-2 { animation: waveMove 12s linear infinite reverse; opacity: 0.4; bottom: -20px; }
+  .wave-3 { animation: waveMove 6s linear infinite; opacity: 0.2; bottom: -40px; }
+
+  @keyframes waveMove {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(50%); }
+  }
+
+  /* Mountains silhouette */
+  .mountain-silhouette {
+    position: absolute;
+    bottom: 60px; left: 0; right: 0;
+    height: 280px;
+    background:
+      /* front ridge */
+      polygon(0 100%, 8% 55%, 20% 70%, 35% 30%, 50% 65%, 65% 25%, 78% 60%, 90% 40%, 100% 55%, 100% 100%);
+  }
+
+  .mountains-svg {
+    position: absolute;
+    bottom: 50px; left: 0; right: 0;
+    width: 100%;
+    height: 300px;
+  }
+
+  .hero-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.4em;
+    color: var(--gold-accent);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 9vw, 8rem);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: var(--white);
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 1s 0.6s forwards;
+  }
+
+  .hero-title span {
+    display: block;
+    color: var(--water-glow);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.55em;
+    letter-spacing: 0.05em;
+  }
+
+  .hero-sub {
+    margin-top: 1.5rem;
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    max-width: 500px;
+    opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+  }
+
+  .hero-actions {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 1s 1.2s forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.85rem 2rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary {
+    background: var(--gold-accent);
+    color: var(--water-deep);
+  }
+
+  .btn-primary:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(212,168,68,0.4);
+  }
+
+  .btn-tour {
+    background: transparent;
+    color: var(--white);
+    border: 1.5px solid rgba(255,255,255,0.35);
+    backdrop-filter: blur(8px);
+  }
+
+  .btn-tour:hover {
+    border-color: var(--water-glow);
+    color: var(--water-glow);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(91,163,232,0.2);
+  }
+
+  .btn-unity {
+    background: linear-gradient(135deg, var(--water-blue), var(--water-light));
+    color: var(--white);
+    padding: 0.85rem 2.2rem;
+  }
+
+  .btn-unity:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(26,74,122,0.6);
+    filter: brightness(1.15);
+  }
+
+  /* ─── SCROLL INDICATOR ─── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    opacity: 0;
+    animation: fadeUp 1s 2s forwards;
+  }
+
+  .scroll-hint span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--text-muted), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.4s;
+  }
+
+  nav.scrolled {
+    background: rgba(6,14,28,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .nav-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: var(--gold-accent);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--white); }
+
+  /* ─── SECTIONS ─── */
+  section { padding: 6rem 2rem; }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: var(--gold-accent);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 2rem;
+  }
+
+  /* ─── VOICEOVER PANEL ─── */
+  #voiceover {
+    background: var(--water-mid);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .vo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  @media (max-width: 768px) {
+    .vo-grid { grid-template-columns: 1fr; }
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { gap: 1.2rem; }
+  }
+
+  .vo-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, background 0.3s;
+    cursor: pointer;
+  }
+
+  .vo-card.active {
+    border-color: var(--water-glow);
+    background: rgba(91,163,232,0.08);
+  }
+
+  .vo-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 0;
+    background: var(--water-glow);
+    transition: height 0.4s ease;
+  }
+
+  .vo-card.active::before { height: 100%; }
+
+  .vo-card-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+  }
+
+  .vo-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin-bottom: 0.8rem;
+    color: var(--white);
+  }
+
+  .vo-card-text {
+    font-size: 0.9rem;
+    line-height: 1.75;
+    color: var(--text-muted);
+    margin-bottom: 1.4rem;
+  }
+
+  /* ─── AUDIO PLAYER ─── */
+  .audio-player {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 1.5rem;
+    margin-top: 2rem;
+    position: sticky;
+    bottom: 1.5rem;
+    z-index: 10;
+    backdrop-filter: blur(16px);
+  }
+
+  .player-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--gold-accent);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .player-track {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .player-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .play-btn {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--water-light);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+
+  .play-btn:hover {
+    background: var(--water-glow);
+    transform: scale(1.1);
+  }
+
+  .play-btn svg { fill: white; }
+
+  .progress-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--water-glow);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.1s linear;
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: -4px; top: -4px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--water-glow);
+    box-shadow: 0 0 8px var(--water-glow);
+  }
+
+  .progress-times {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Waveform bars (visual only) */
+  .waveform {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 28px;
+    margin-left: 1rem;
+  }
+
+  .waveform .bar {
+    width: 3px;
+    background: var(--water-blue);
+    border-radius: 2px;
+    animation: wavePulse var(--dur) ease-in-out infinite alternate;
+    transform-origin: bottom;
+  }
+
+  @keyframes wavePulse {
+    from { transform: scaleY(0.3); }
+    to   { transform: scaleY(1); }
+  }
+
+  .waveform.playing .bar { background: var(--water-glow); }
+
+  /* ─── TOPICS (mini cards for the 3 chapters) ─── */
+  .chapters { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem; }
+
+  .chapter-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.3rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .chapter-btn:hover, .chapter-btn.active {
+    background: rgba(91,163,232,0.15);
+    border-color: var(--water-glow);
+    color: var(--water-glow);
+  }
+
+  /* ─── FACTS ─── */
+  #facts { background: var(--water-deep); }
+
+  .facts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.05);
+    margin-top: 3rem;
+  }
+
+  .fact-cell {
+    background: var(--water-deep);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    transition: background 0.3s;
+  }
+
+  .fact-cell:hover { background: rgba(26,74,122,0.3); }
+
+  .fact-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--water-glow);
+    line-height: 1;
+  }
+
+  .fact-unit {
+    font-size: 1.2rem;
+    color: var(--gold-accent);
+  }
+
+  .fact-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+
+  /* ─── MAP ─── */
+  #map-section { background: var(--water-mid); }
+
+  #katse-map {
+    height: 500px;
+    width: 100%;
+    margin-top: 2.5rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    z-index: 1;
+  }
+
+  .map-callouts {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  .map-pin-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .pin-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+  }
+
+  /* ─── VIRTUAL TOUR ─── */
+  #virtual-tour {
+    background: linear-gradient(135deg, var(--water-deep) 0%, #0a1e38 100%);
+    text-align: center;
+    padding: 8rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .vt-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(45,125,210,0.15) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .vt-ring {
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    border: 1px solid rgba(91,163,232,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 3rem;
+    position: relative;
+    animation: ringPulse 4s ease-in-out infinite;
+  }
+
+  .vt-ring::before {
+    content: '';
+    position: absolute; inset: -20px;
+    border-radius: 50%;
+    border: 1px solid rgba(91,163,232,0.08);
+    animation: ringPulse 4s 1s ease-in-out infinite;
+  }
+
+  .vt-ring::after {
+    content: '';
+    position: absolute; inset: -40px;
+    border-radius: 50%;
+    border: 1px solid rgba(91,163,232,0.04);
+    animation: ringPulse 4s 2s ease-in-out infinite;
+  }
+
+  .vt-icon {
+    font-size: 4rem;
+    filter: drop-shadow(0 0 20px rgba(91,163,232,0.5));
+  }
+
+  @keyframes ringPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.03); }
+  }
+
+  .vt-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: 1rem;
+  }
+
+  .vt-description {
+    color: var(--text-muted);
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.8;
+  }
+
+  .btn-tour-big {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 1.1rem 3rem;
+    background: transparent;
+    color: var(--white);
+    border: 2px solid rgba(91,163,232,0.5);
+    cursor: not-allowed;
+    opacity: 0.6;
+    position: relative;
+  }
+
+  .coming-soon-tag {
+    position: absolute;
+    top: -10px; right: -10px;
+    background: var(--gold-accent);
+    color: var(--water-deep);
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    padding: 0.2rem 0.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: #060e1c;
+    padding: 3rem 2rem;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  footer p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  footer strong { color: var(--gold-accent); }
+
+  /* ─── UNITY LINK BANNER ─── */
+  .unity-banner {
+    background: linear-gradient(135deg, rgba(13,36,68,0.95), rgba(26,74,122,0.95));
+    border: 1px solid rgba(91,163,232,0.25);
+    padding: 2rem;
+    margin-top: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .unity-info h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .unity-info p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  /* ─── LEAFLET OVERRIDE (dark tiles) ─── */
+  .leaflet-container { background: var(--water-deep); font-family: 'Barlow', sans-serif; }
+  .leaflet-popup-content-wrapper {
+    background: var(--water-mid);
+    color: var(--white);
+    border: 1px solid rgba(91,163,232,0.3);
+    border-radius: 0;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  }
+  .leaflet-popup-tip { background: var(--water-mid); }
+  .leaflet-popup-content { font-family: 'Barlow', sans-serif; font-size: 0.9rem; }
+  .leaflet-popup-content b { color: var(--water-glow); }
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav id="main-nav">
+  <a href="#" class="nav-logo">Katse Dam</a>
+  <ul class="nav-links">
+    <li><a href="#voiceover">Audio</a></li>
+    <li><a href="#facts">Facts</a></li>
+    <li><a href="#map-section">Map</a></li>
+    <li><a href="#virtual-tour">Tour</a></li>
+  </ul>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section id="hero">
+  <div class="hero-bg"></div>
+
+  <!-- SVG mountains -->
+  <svg class="mountains-svg" viewBox="0 0 1440 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Back range -->
+    <polygon points="0,300 0,200 100,130 200,180 320,90 450,160 560,70 680,140 800,80 920,150 1040,60 1160,130 1280,95 1380,160 1440,120 1440,300" fill="rgba(10,22,40,0.7)"/>
+    <!-- Front range -->
+    <polygon points="0,300 0,240 80,200 180,230 280,160 380,210 500,140 620,200 740,130 860,185 960,115 1080,170 1200,140 1320,200 1440,160 1440,300" fill="rgba(13,36,68,0.85)"/>
+    <!-- Dam wall suggestion -->
+    <rect x="650" y="195" width="140" height="105" fill="rgba(8,17,32,0.9)"/>
+    <rect x="645" y="192" width="150" height="8" fill="rgba(139,115,85,0.7)"/>
+    <!-- Water reflection glow -->
+    <ellipse cx="720" cy="280" rx="200" ry="30" fill="rgba(45,125,210,0.12)"/>
+  </svg>
+
+  <!-- Waves -->
+  <div class="wave-container">
+    <div class="wave wave-1">
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,60 C200,100 400,20 600,60 C800,100 1000,20 1200,60 L1200,120 L0,120 Z" fill="rgba(10,22,40,0.8)"/>
+      </svg>
+    </div>
+    <div class="wave wave-2">
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,40 C300,80 500,0 700,50 C900,100 1100,10 1200,50 L1200,120 L0,120 Z" fill="rgba(13,36,68,0.7)"/>
+      </svg>
+    </div>
+    <div class="wave wave-3">
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,70 C150,30 350,90 550,50 C750,10 950,80 1200,40 L1200,120 L0,120 Z" fill="rgba(6,14,28,0.9)"/>
+      </svg>
+    </div>
+  </div>
+
+  <div style="position:relative; z-index:2;">
+    <p class="hero-badge">Lesotho Highlands Water Project</p>
+    <h1 class="hero-title">
+      KATSE<span>Dam &amp; Surroundings</span>
+    </h1>
+    <p class="hero-sub">Explore one of Africa's greatest engineering achievements — nestled deep in the Maluti Mountains of Lesotho.</p>
+    <div class="hero-actions">
+      <a href="#voiceover" class="btn btn-primary">
+        🔊 Listen to Audio Guide
+      </a>
+      <a href="unity.html" target="_blank" rel="noopener" class="btn btn-unity">
+        🌐 Enter Unity Environment
+      </a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Explore</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ─── VOICEOVER SECTION ─── -->
+<section id="voiceover">
+  <div class="container">
+    <p class="section-label">Audio Guide</p>
+    <h2 class="section-title">Hear the Story of<br>Katse Dam</h2>
+    <p style="color: var(--text-muted); max-width: 540px; line-height:1.8; margin-bottom: 2rem;">
+      Select a chapter below to listen to a guided narration about each landmark. The voiceover uses your browser's built-in speech synthesis.
+    </p>
+
+    <div class="chapters">
+      <button class="chapter-btn active" onclick="selectChapter(0)">01 — Katse Dam</button>
+      <button class="chapter-btn" onclick="selectChapter(1)">02 — Intake Tower</button>
+      <button class="chapter-btn" onclick="selectChapter(2)">03 — Mphorosane Bridge</button>
+    </div>
+
+    <!-- Audio Player -->
+    <div class="audio-player">
+      <div class="player-title">Now Playing</div>
+      <div class="player-track" id="player-track-name">Katse Dam — The Engineering Marvel</div>
+      <div class="player-controls">
+        <button class="play-btn" id="play-pause-btn" onclick="togglePlayback()">
+          <svg id="play-icon" width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="progress-wrap">
+          <div class="progress-bar" onclick="seekAudio(event)" id="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-times">
+            <span id="time-current">0:00</span>
+            <span id="time-total">–:––</span>
+          </div>
+        </div>
+        <div class="waveform" id="waveform">
+          <div class="bar" style="height:16px; --dur:0.6s;"></div>
+          <div class="bar" style="height:24px; --dur:0.4s;"></div>
+          <div class="bar" style="height:12px; --dur:0.8s;"></div>
+          <div class="bar" style="height:20px; --dur:0.5s;"></div>
+          <div class="bar" style="height:28px; --dur:0.7s;"></div>
+          <div class="bar" style="height:14px; --dur:0.45s;"></div>
+          <div class="bar" style="height:22px; --dur:0.65s;"></div>
+          <div class="bar" style="height:18px; --dur:0.55s;"></div>
         </div>
       </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">Toka</div>
+    </div>
+
+    <!-- Chapter Cards -->
+    <div class="vo-grid" style="margin-top: 2.5rem;">
+      <div class="vo-card active" id="card-0" onclick="selectChapter(0)">
+        <div class="vo-card-num">Chapter 01</div>
+        <h3 class="vo-card-title">Katse Dam</h3>
+        <p class="vo-card-text">
+          Katse Dam stands as one of Africa's most remarkable feats of engineering. Located in the Maluti Mountains of Lesotho, it is a double-curvature arch dam completed in 1996 as part of the Lesotho Highlands Water Project. Rising 185 metres above the valley floor, its arch structure elegantly transfers the immense water pressure into the surrounding rock walls. The reservoir stretches over 45 kilometres into the mountain terrain, storing water that is transferred northward to South Africa through a series of tunnels. Beyond its engineering brilliance, the dam supplies critical water to the Gauteng region while generating hydroelectric power for Lesotho, making it a cornerstone of southern African development.
+        </p>
+      </div>
+      <div class="vo-card" id="card-1" onclick="selectChapter(1)">
+        <div class="vo-card-num">Chapter 02</div>
+        <h3 class="vo-card-title">Katse Intake Tower</h3>
+        <p class="vo-card-text">
+          Rising from the deep blue waters of the Katse reservoir is the iconic Intake Tower — a cylindrical concrete structure that serves as the gateway through which water begins its long journey to South Africa. The tower contains a series of valves and control gates that regulate the flow of water into the transfer tunnel below. Engineers designed the tower to draw water from varying depths, allowing for quality control depending on conditions in the reservoir. It stands as both a functional marvel and a striking visual landmark, often photographed rising dramatically from the still mountain waters with the dam wall visible in the background.
+        </p>
+      </div>
+      <div class="vo-card" id="card-2" onclick="selectChapter(2)">
+        <div class="vo-card-num">Chapter 03</div>
+        <h3 class="vo-card-title">Mphorosane Bridge</h3>
+        <p class="vo-card-text">
+          Spanning a dramatic gorge carved by one of the reservoir's arms, the Mphorosane Bridge is a slender, elegant structure that connects communities separated by the rising waters of the Katse reservoir. Built as part of the infrastructure development accompanying the Lesotho Highlands Water Project, the bridge replaced routes that were submerged when the dam was filled. It rises high above the turquoise water below, offering breathtaking views of the surrounding mountain landscape. The bridge has since become a popular attraction for visitors to the dam area, admired for both its graceful engineering and the spectacular scenery it reveals.
+        </p>
       </div>
     </div>
-    <script>
-      var canvas = document.querySelector("#unity-canvas");
+  </div>
+</section>
 
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
-      }
+<!-- ─── FACTS ─── -->
+<section id="facts">
+  <div class="container">
+    <p class="section-label">By the Numbers</p>
+    <h2 class="section-title">Katse Dam at a Glance</h2>
+    <div class="facts-grid">
+      <div class="fact-cell">
+        <div class="fact-num">185<span class="fact-unit">m</span></div>
+        <div class="fact-label">Height of Dam Wall</div>
+      </div>
+      <div class="fact-cell">
+        <div class="fact-num">710<span class="fact-unit">m</span></div>
+        <div class="fact-label">Crest Length</div>
+      </div>
+      <div class="fact-cell">
+        <div class="fact-num">1,950<span class="fact-unit">Mm³</span></div>
+        <div class="fact-label">Reservoir Capacity</div>
+      </div>
+      <div class="fact-cell">
+        <div class="fact-num">45<span class="fact-unit">km</span></div>
+        <div class="fact-label">Reservoir Length</div>
+      </div>
+      <div class="fact-cell">
+        <div class="fact-num">1996</div>
+        <div class="fact-label">Year Completed</div>
+      </div>
+      <div class="fact-cell">
+        <div class="fact-num">72<span class="fact-unit">MW</span></div>
+        <div class="fact-label">Hydroelectric Power</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/TokaA3-1.loader.js";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/TokaA3-1.data.unityweb",
-        frameworkUrl: buildUrl + "/TokaA3-1.framework.js.unityweb",
-        codeUrl: buildUrl + "/TokaA3-1.wasm.unityweb",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "Toka",
-        productVersion: "0.1.0",
-        showBanner: unityShowBanner,
-        // errorHandler: function(err, url, line) {
-        //    alert("error " + err + " occurred at line " + line);
-        //    // Return 'true' if you handled this error and don't want Unity
-        //    // to process it further, 'false' otherwise.
-        //    return true;
-        // },
-      };
+<!-- ─── MAP ─── -->
+<section id="map-section">
+  <div class="container">
+    <p class="section-label">Interactive Map</p>
+    <h2 class="section-title">Locate Katse Dam</h2>
+    <p style="color: var(--text-muted); line-height: 1.8; max-width: 560px;">
+      Explore the geography of the Katse Dam area. Click on each marker to learn more about the key landmarks. Zoom and drag to navigate the Maluti Mountain terrain.
+    </p>
 
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
+    <div id="katse-map"></div>
 
-      // If you would like all file writes inside Unity Application.persistentDataPath
-      // directory to automatically persist so that the contents are remembered when
-      // the user revisits the site the next time, uncomment the following line:
-      // config.autoSyncPersistentDataPath = true;
-      // This autosyncing is currently not the default behavior to avoid regressing
-      // existing user projects that might rely on the earlier manual
-      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-      // expected to change.
+    <div class="map-callouts">
+      <div class="map-pin-legend"><div class="pin-dot" style="background:#2d7dd2;"></div> Katse Dam Wall</div>
+      <div class="map-pin-legend"><div class="pin-dot" style="background:#d4a844;"></div> Intake Tower</div>
+      <div class="map-pin-legend"><div class="pin-dot" style="background:#5ba3e8;"></div> Mphorosane Bridge</div>
+      <div class="map-pin-legend"><div class="pin-dot" style="background:#e05050;"></div> Visitor Centre</div>
+    </div>
 
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
+    <!-- Unity Environment Banner -->
+    <div class="unity-banner">
+      <div class="unity-info">
+        <h3>🌐 Explore in Unity 3D</h3>
+        <p>Experience Katse Dam in an immersive real-time 3D environment — built in Unity. Walk the dam, view the intake tower, and cross the bridge virtually.</p>
+      </div>
+      <a href="https://kevinmkk.github.io/TokaA3/" target="_blank" rel="noopener" class="btn btn-unity">
+        Launch Environment →
+      </a>
+    </div>
+  </div>
+</section>
 
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
+<!-- ─── VIRTUAL TOUR ─── -->
+<section id="virtual-tour">
+  <div class="vt-glow"></div>
+  <div style="position:relative; z-index:2;">
+    <div class="vt-ring">
+      <div class="vt-icon">🏔️</div>
+    </div>
+    <p class="section-label" style="margin-bottom:0.8rem;">Virtual Experience</p>
+    <h2 class="vt-title">Open Virtual Tour</h2>
+    <p class="vt-description">
+      An immersive 360° virtual tour of Katse Dam, the Intake Tower, and Mphorosane Bridge is coming soon. Step inside the dam wall, explore the intake gallery, and walk across the bridge — all from your browser.
+    </p>
+    <div style="position:relative; display:inline-block;">
+      <button class="btn-tour-big" disabled title="Virtual Tour Coming Soon">
+        🔭 Open Virtual Tour
+        <span class="coming-soon-tag">Coming Soon</span>
+      </button>
+    </div>
+    <p style="margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted);">
+      Meanwhile, explore the Unity 3D environment below.
+    </p>
+    <a href="https://kevinmkk.github.io/TokaA3/" target="_blank" rel="noopener" class="btn btn-unity" style="margin-top:1rem; display:inline-flex;">
+      🌐 Launch Unity 3D Environment
+    </a>
+  </div>
+</section>
 
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
+<!-- ─── FOOTER ─── -->
+<footer>
+  <p style="margin-bottom:0.4rem; font-size: 1rem; font-family: 'Playfair Display', serif; color: var(--white);">Katse Dam, Lesotho</p>
+  <p>Part of the <strong>Lesotho Highlands Water Project</strong> — engineering excellence in the Maluti Mountains.</p>
+  <p style="margin-top:0.8rem;">Unity Environment: <a href="https://kevinmkk.github.io/TokaA3/" target="_blank" style="color: var(--water-glow); text-decoration:none;">kevinmkk.github.io/TokaA3</a></p>
+</footer>
 
+<script>
+// ─── NAV SCROLL ───
+window.addEventListener('scroll', () => {
+  document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 60);
+});
 
-      } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
-      }
+// ─── VOICEOVER / SPEECH SYNTHESIS ───
+const chapters = [
+  {
+    title: "Katse Dam — The Engineering Marvel",
+    text: "Katse Dam stands as one of Africa's most remarkable feats of engineering. Located in the Maluti Mountains of Lesotho, it is a double-curvature arch dam completed in 1996 as part of the Lesotho Highlands Water Project. Rising 185 metres above the valley floor, its arch structure elegantly transfers the immense water pressure into the surrounding rock walls. The reservoir stretches over 45 kilometres into the mountain terrain, storing water that is transferred northward to South Africa through a series of tunnels. Beyond its engineering brilliance, the dam supplies critical water to the Gauteng region while generating hydroelectric power for Lesotho, making it a cornerstone of southern African development."
+  },
+  {
+    title: "Katse Intake Tower — Gateway to the Tunnels",
+    text: "Rising from the deep blue waters of the Katse reservoir is the iconic Intake Tower — a cylindrical concrete structure that serves as the gateway through which water begins its long journey to South Africa. The tower contains a series of valves and control gates that regulate the flow of water into the transfer tunnel below. Engineers designed the tower to draw water from varying depths, allowing for quality control depending on conditions in the reservoir. It stands as both a functional marvel and a striking visual landmark, often photographed rising dramatically from the still mountain waters with the dam wall visible in the background."
+  },
+  {
+    title: "Mphorosane Bridge — Spanning the Heights",
+    text: "Spanning a dramatic gorge carved by one of the reservoir's arms, the Mphorosane Bridge is a slender, elegant structure that connects communities separated by the rising waters of the Katse reservoir. Built as part of the infrastructure development accompanying the Lesotho Highlands Water Project, the bridge replaced routes that were submerged when the dam was filled. It rises high above the turquoise water below, offering breathtaking views of the surrounding mountain landscape. The bridge has since become a popular attraction for visitors to the dam area, admired for both its graceful engineering and the spectacular scenery it reveals."
+  }
+];
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
+let currentChapter = 0;
+let utterance = null;
+let isPlaying = false;
+let progressInterval = null;
+let startTime = 0;
+let elapsed = 0;
+const estimatedDuration = [52, 48, 50]; // estimated seconds per chapter
 
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
-                document.querySelector("#unity-loading-bar").style.display = "none";
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
+function selectChapter(idx) {
+  stopPlayback();
+  currentChapter = idx;
 
-              }).catch((message) => {
-                alert(message);
-              });
-            };
+  document.querySelectorAll('.chapter-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.querySelectorAll('.vo-card').forEach((c, i) => c.classList.toggle('active', i === idx));
+  document.getElementById('player-track-name').textContent = chapters[idx].title;
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('time-current').textContent = '0:00';
+  document.getElementById('time-total').textContent = formatTime(estimatedDuration[idx]);
+}
 
-      document.body.appendChild(script);
+function togglePlayback() {
+  if (isPlaying) {
+    stopPlayback();
+  } else {
+    startPlayback();
+  }
+}
 
-    </script>
-  </body>
+function startPlayback() {
+  if (!window.speechSynthesis) {
+    alert('Your browser does not support speech synthesis. Please try Chrome or Edge.');
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  utterance = new SpeechSynthesisUtterance(chapters[currentChapter].text);
+  utterance.rate = 0.92;
+  utterance.pitch = 1.0;
+  utterance.volume = 1;
+
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v => v.lang === 'en-GB' || v.name.includes('Daniel') || v.name.includes('Google UK') || v.name.includes('British'));
+  if (preferred) utterance.voice = preferred;
+
+  utterance.onend = () => {
+    setPlaying(false);
+    document.getElementById('progress-fill').style.width = '100%';
+  };
+
+  utterance.onerror = () => setPlaying(false);
+
+  window.speechSynthesis.speak(utterance);
+  setPlaying(true);
+
+  startTime = Date.now() - elapsed * 1000;
+  progressInterval = setInterval(updateProgress, 200);
+}
+
+function stopPlayback() {
+  window.speechSynthesis.cancel();
+  clearInterval(progressInterval);
+  elapsed = 0;
+  setPlaying(false);
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('time-current').textContent = '0:00';
+}
+
+function setPlaying(state) {
+  isPlaying = state;
+  const btn = document.getElementById('play-pause-btn');
+  document.getElementById('waveform').classList.toggle('playing', state);
+
+  if (state) {
+    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+  } else {
+    btn.innerHTML = `<svg id="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>`;
+    clearInterval(progressInterval);
+  }
+}
+
+function updateProgress() {
+  if (!isPlaying) return;
+  elapsed = (Date.now() - startTime) / 1000;
+  const dur = estimatedDuration[currentChapter];
+  const pct = Math.min((elapsed / dur) * 100, 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('time-current').textContent = formatTime(Math.min(elapsed, dur));
+}
+
+function seekAudio(e) {
+  const bar = document.getElementById('progress-bar');
+  const rect = bar.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  const dur = estimatedDuration[currentChapter];
+  elapsed = pct * dur;
+  document.getElementById('progress-fill').style.width = (pct * 100) + '%';
+  document.getElementById('time-current').textContent = formatTime(elapsed);
+
+  if (isPlaying) {
+    stopPlayback();
+    // Attempt to restart from position by skipping spoken content isn't natively supported; restart for now
+    setTimeout(startPlayback, 100);
+  }
+}
+
+function formatTime(s) {
+  s = Math.floor(s);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+// Load voices async
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => {};
+}
+
+// Set initial total time
+document.getElementById('time-total').textContent = formatTime(estimatedDuration[0]);
+
+// ─── LEAFLET MAP ───
+document.addEventListener('DOMContentLoaded', () => {
+  const map = L.map('katse-map', {
+    center: [-29.33, 28.50],
+    zoom: 12,
+    zoomControl: true,
+    attributionControl: true
+  });
+
+  // Dark tile layer (CartoDB Dark Matter)
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(map);
+
+  // Custom markers
+  function makeMarker(color, label) {
+    return L.divIcon({
+      className: '',
+      html: `<div style="
+        width:14px; height:14px;
+        background:${color};
+        border-radius:50%;
+        border: 2px solid white;
+        box-shadow: 0 0 10px ${color}, 0 2px 6px rgba(0,0,0,0.5);
+        position:relative;
+      "></div>`,
+      iconSize: [14, 14],
+      iconAnchor: [7, 7]
+    });
+  }
+
+  // Katse Dam Wall
+  L.marker([-29.338, 28.499], { icon: makeMarker('#2d7dd2', 'Dam') })
+    .addTo(map)
+    .bindPopup(`<b style="color:#5ba3e8;">Katse Dam Wall</b><br>Double-curvature arch dam<br>Height: 185 m | Completed: 1996<br><br><a href="https://kevinmkk.github.io/TokaA3/" target="_blank" style="color:#5ba3e8;">→ View in Unity 3D</a>`);
+
+  // Intake Tower
+  L.marker([-29.330, 28.503], { icon: makeMarker('#d4a844', 'Tower') })
+    .addTo(map)
+    .bindPopup(`<b style="color:#d4a844;">Katse Intake Tower</b><br>Controls water flow into transfer tunnels<br>Connects to LHWP transfer system`);
+
+  // Mphorosane Bridge
+  L.marker([-29.315, 28.520], { icon: makeMarker('#5ba3e8', 'Bridge') })
+    .addTo(map)
+    .bindPopup(`<b style="color:#5ba3e8;">Mphorosane Bridge</b><br>Spans a deep reservoir gorge<br>Popular scenic viewpoint`);
+
+  // Visitor Centre
+  L.marker([-29.345, 28.490], { icon: makeMarker('#e05050', 'Visitor') })
+    .addTo(map)
+    .bindPopup(`<b style="color:#e05050;">Visitor Centre</b><br>Tours, exhibitions &amp; guided walks<br>Open Mon–Sun`);
+
+  // Add a subtle polygon showing reservoir shape
+  const reservoirPoints = [
+    [-29.28, 28.46], [-29.29, 28.48], [-29.30, 28.50], [-29.32, 28.51],
+    [-29.34, 28.50], [-29.36, 28.49], [-29.38, 28.50], [-29.36, 28.52],
+    [-29.34, 28.54], [-29.32, 28.53], [-29.30, 28.52], [-29.28, 28.50],
+    [-29.27, 28.48], [-29.28, 28.46]
+  ];
+
+  L.polygon(reservoirPoints, {
+    color: 'rgba(45,125,210,0.6)',
+    fillColor: 'rgba(26,74,122,0.25)',
+    weight: 1.5,
+    fillOpacity: 1
+  }).addTo(map).bindPopup('<b style="color:#5ba3e8;">Katse Reservoir</b><br>Capacity: 1,950 million m³<br>Length: ~45 km');
+});
+</script>
+</body>
 </html>
